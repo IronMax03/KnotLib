@@ -1,3 +1,11 @@
+# compiled file
+main
+# vscode
+.vscode
+
+# other files to ignore
+build/
+
 # Prerequisites
 *.d
 
