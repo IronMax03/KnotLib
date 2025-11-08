@@ -3,33 +3,42 @@
 #include <concepts>
 #include <cstdint>
 #include <utility>
+#include <armadillo>
 
-/*
-template <typename T>
-concept arithmetic = std::integral<T> || std::floating_point<T>;
-*/
+struct term
+{
+    double coefficient;
+    int_fast16_t degree;
+};
 
-// ! make template
+/**
+ * @brief Represents a single-variable polynomial with an inclusive degree range.
+ *
+ * The polynomial tracks a lower and upper degree bound and stores coefficients
+ * for every integer exponent in that closed interval.
+ */
 class Polynomial
 {
 public:
-    Polynomial() = default;
+    Polynomial();
     Polynomial(const Polynomial &n) = default;
-    Polynomial(std::vector<double> coefficient, int_fast16_t smallest_deg);
+    Polynomial(int_fast16_t smallest_deg, int_fast16_t bigest_deg);
+    Polynomial(std::vector<double> coefficient, int_fast16_t smallest_deg, int_fast16_t bigest_deg);
 
+    inline bool operator==(const Polynomial &n);
     Polynomial operator+(const Polynomial &n);
     Polynomial operator-(const Polynomial &n);
     Polynomial operator*(const Polynomial &n);
 
-    void addTerm(int_fast16_t degree);
+    void setFromStr(std::string polynom);
 
-    // read only
+    inline int_fast16_t getTerm(size_t i) const;
     int_fast16_t getSmallestTerm() const;
     std::string toString() const;
 
 private:
-    std::vector<double> _coefficient;
+    std::vector<double> _coefficients;
     int_fast16_t _termDegreeLowerBound, _termDegreeUpperBound;
 
-    inline std::vector<double> coeffSum(std::vector<double> coefficient, int_fast16_t termDegreeLowerBound, int_fast16_t termDegreeUpperBound, bool isNegative);
+    inline constexpr static size_t calcCoeffSize(int_fast16_t smallest_deg, int_fast16_t bigest_deg);
 };

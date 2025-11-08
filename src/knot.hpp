@@ -47,12 +47,3 @@ private:
   bool isConcistent() const;
   void reduce() const;
 };
-
-class InconsistenPlanarDiagram : public std::exception {
-public:
-    InconsistenPlanarDiagram(){};
-
-    const char* what() const noexcept {
-        return "";
-    }
-};
