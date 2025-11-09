@@ -9,6 +9,8 @@ using namespace arma;
 // clang++ -std=c++14 src/tests.cpp -o main -I/opt/homebrew/include -L/opt/homebrew/lib -larmadillo
 // clang++ -std=c++20 src/tests.cpp src/Polynomials.cpp -I/opt/homebrew/include -L/opt/homebrew/lib -larmadillo -Wall
 
+void runTests();
+
 int main()
 {
     mat A = randu<mat>(2,2);
@@ -20,18 +22,50 @@ int main()
     A.print("Random matrix A:");
 
     cout << "______________________________" << endl;
+    runTests();
+
+    return 0;
+}
+
+void runTests()
+{
+   cout << "______________________________[Polnomial Tests]______________________________" << endl;
 
     Polynomial poly;
     cout << poly.toString() << endl;
-    
-    cout << Polynomial(vector<double>{1,2,3}, -1, 1).toString() << endl;
-    assert(Polynomial(vector<double>{1,2,3}, 0, 2).toString() == "1.000000x^0 + 2.000000x^1 + 3.000000x^2");
-    assert(Polynomial(vector<double>{1,2,3}, -1, 1).toString() == "1.000000x^-1 + 2.000000x^0 + 3.000000x^1");
-    assert(Polynomial(vector<double>{}, 0, 0).toString() ==  "... + 0x^-1 + 0x^0 + 0x^1 + ...");
 
-    poly.setFromStr("3x^0 + 1x^1 + 0x^2 + 9x^3");
+    assert(poly == Polynomial(std::vector<Term>{Term{0, 0}}, 0, 0));
+    assert(poly == Polynomial(std::vector<Term>{Term{0, 0}}, 0, 9));
+    assert(poly == Polynomial(std::vector<Term>{Term{0, 0}}, -3, 4));
 
+
+    poly = Polynomial(vector<Term>{Term{3,0}, Term{1,1}, Term{0,2}, Term{9,3}}, 0, 3);
     cout << poly.toString() << endl;
-    assert(poly.toString() == "3x^0 + 1x^1 + 0x^2 + 9x^3");
-    return 0;
+    assert(poly.toString() == "3.000000x^0 + 1.000000x^1 + 0.000000x^2 + 9.000000x^3");
+
+    Polynomial poly2 = Polynomial(vector<Term>{Term{3,-1}, Term{3,1}}, 0, 3);
+
+    assert(poly != poly2);
+    assert(!(poly == poly2));
+
+    cout << (poly + 2.0).toString() << endl;
+    assert((poly + 2.0).toString() == "5.000000x^0 + 1.000000x^1 + 0.000000x^2 + 9.000000x^3");    assert(poly.toString() == "3.000000x^0 + 1.000000x^1 + 0.000000x^2 + 9.000000x^3");
+    assert((poly - 2.0).toString() == "1.000000x^0 + 1.000000x^1 + 0.000000x^2 + 9.000000x^3");
+    assert((poly * 2.0).toString() == "6.000000x^0 + 2.000000x^1 + 0.000000x^2 + 18.000000x^3");
+    assert((poly / 2.0).toString() == "1.500000x^0 + 0.500000x^1 + 0.000000x^2 + 4.500000x^3");
+
+    cout << (poly / 2.0).toString() << endl;
+
+
+    cout << (Polynomial().isMonomial() ? "True" : "False") << endl;
+    cout << (Polynomial(vector<Term>{Term{3,2}}, 2, 2).isMonomial() ? "True" : "False") << endl;
+    assert(Polynomial().isMonomial());
+    assert(Polynomial(vector<Term>{Term{3,2}}, 2, 2).isMonomial());
+    assert(!Polynomial(vector<Term>{Term{3,2}, Term{1,2}}, 2, 2).isMonomial());
+
+
+    assert(Polynomial(vector<Term>{Term{3,2}, Term{1,2}}, 2, 2).findExponent(2) == 1);
+    assert(Polynomial(vector<Term>{Term{3, -2}, Term{1, -1}, Term{3,2}, Term{1,2}}, 2, 2).findExponent(-2) == 0);
+
+    cout << "_____________________________________________________________________________" << endl;
 }

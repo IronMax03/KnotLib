@@ -1,14 +1,42 @@
 #pragma once
+
+#include "exception.hpp"
 #include <vector>
-#include <concepts>
 #include <cstdint>
 #include <utility>
-#include <armadillo>
+//#include <algorithm>
+#include <string>
 
-struct term
+struct Term
 {
     double coefficient;
     int_fast16_t degree;
+
+
+    inline void operator*=(const double scalar) { coefficient *= scalar; }
+
+    inline void operator/=(const double scalar)
+    {
+        if (scalar == 0)
+            throw PolynomialArithmeticException("/=", "zero division exception."); // TODO: create a new Exception class
+        coefficient /= scalar;
+    }
+
+    inline void operator+=(const Term &n)
+    {
+        if (degree != n.degree)
+            throw PolynomialArithmeticException("+=", "2 terms must have the same exponent sum them."); // TODO: create a new Exception class
+        coefficient += n.coefficient;
+    }
+
+    inline void operator-=(const Term &n)
+    {
+        if (degree != n.degree)
+            throw PolynomialArithmeticException("-=", "2 terms must have the same exponent sum them."); // TODO: create a new Exception class
+        coefficient -= n.coefficient;
+    }
+
+    inline bool operator==(const Term &n) const { return coefficient == n.coefficient && degree == n.degree; }
 };
 
 /**
@@ -22,23 +50,50 @@ class Polynomial
 public:
     Polynomial();
     Polynomial(const Polynomial &n) = default;
-    Polynomial(int_fast16_t smallest_deg, int_fast16_t bigest_deg);
-    Polynomial(std::vector<double> coefficient, int_fast16_t smallest_deg, int_fast16_t bigest_deg);
+    Polynomial(int_fast16_t smallest_deg, int_fast16_t biggest_deg);
+    Polynomial(std::vector<Term> coefficient, int_fast16_t smallest_deg, int_fast16_t biggest_deg);
 
-    inline bool operator==(const Polynomial &n);
-    Polynomial operator+(const Polynomial &n);
-    Polynomial operator-(const Polynomial &n);
-    Polynomial operator*(const Polynomial &n);
+    // Polynomial operations
+    bool operator==(const Polynomial &n) const;
+    bool operator!=(const Polynomial &n) const;
 
-    void setFromStr(std::string polynom);
+    Polynomial operator+(const Polynomial &n) const;
+    Polynomial operator-(const Polynomial &n) const;
+    Polynomial operator*(const Polynomial &n) const;
+    Polynomial operator/(const Polynomial &n) const;
 
-    inline int_fast16_t getTerm(size_t i) const;
-    int_fast16_t getSmallestTerm() const;
+    void operator+=(const Polynomial &n);
+    void operator-=(const Polynomial &n);
+    void operator*=(const Polynomial &n);
+    void operator/=(const Polynomial &n);
+
+    // scalar operations
+    bool operator==(const double scalar) const;
+    bool operator!=(const double scalar) const;
+
+    Polynomial operator+(const double scalar) const;
+    Polynomial operator-(const double scalar) const;
+    Polynomial operator*(const double scalar) const;
+    Polynomial operator/(const double scalar) const;
+
+    void operator+=(const double scalar);
+    void operator-=(const double scalar);
+    void operator*=(const double scalar);
+    void operator/=(const double scalar);
+
+    // read only
+    Term getTerm(size_t i) const;
+    int_fast16_t getDegree() const;
     std::string toString() const;
+    bool isMonomial() const;
+    bool isZero() const;
+
+    size_t findExponent(int_fast16_t exponent) const;
 
 private:
-    std::vector<double> _coefficients;
-    int_fast16_t _termDegreeLowerBound, _termDegreeUpperBound;
+    std::vector<Term> _Terms;
+    int_fast16_t _trailingTermDegree, _leadingTermDegree;
 
-    inline constexpr static size_t calcCoeffSize(int_fast16_t smallest_deg, int_fast16_t bigest_deg);
+    static size_t calcVectorSize(int_fast16_t smallest_deg, int_fast16_t biggest_deg);
+    static size_t binarySearch(const std::vector<Term> &lst, size_t low, size_t hight, const int_fast16_t value);
 };

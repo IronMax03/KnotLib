@@ -1,6 +1,8 @@
 #pragma once
+
 #include <exception>
 #include <iostream>
+#include <string>
 
 class InconsistenPlanarDiagram : public std::exception
 {
@@ -13,35 +15,47 @@ public:
     }
 };
 
-class PolynomBoundException : public std::exception
+class PolynomialBoundException : public std::exception
 {
 private:
-    std::string message;
+    std::string _message;
 
 public:
-    PolynomBoundException(const std::string msg) : message(msg) {}
+    PolynomialBoundException(const std::string msg) : _message(msg) {}
 
     const char *what() const noexcept
     {
-        return message.c_str();
+        return _message.c_str();
     }
 };
 
-/* 
-! to be finished
-class PolynomDegreeOverflow : public std::exception
+
+class PolynomialArithmeticException : public std::exception
 {
 private:
-    size_t _polynomSize;
-    intmax_t _index;
+    std::string _operationType; // +, -, *, ==, +=, etc
+    std::string _message;
 
 public:
-    PolynomOverflow(const size_t polySize, const uint16_t smallestDegree, const uint16_t biggestDegree, const intmax_t i) 
-    : _polynomSize(polySize), _index(i){}
+    PolynomialArithmeticException(const std::string opType, const std::string msg) : _operationType(opType), _message(msg) {}
 
     const char *what() const noexcept
     {
-        std::string str = "The vector  ";
-        return ;
+        return (_operationType + ": " + _message).c_str();
     }
-};*/
+};
+
+
+class ExponentNotFound : public std::exception
+{
+private:
+    int_fast16_t _exp;
+
+public:
+    ExponentNotFound(const int_fast16_t exponent) : _exp(exponent) {}
+
+    const char *what() const noexcept
+    {
+        return (std::to_string(_exp) + " was not fund in the polynom.").c_str();
+    }
+};
