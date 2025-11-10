@@ -9,8 +9,8 @@ Polynomial::Polynomial()
  * @param bigest_deg Inclusive upper bound of the exponent range.
  * @throws PolynomialBoundException if smallest_deg is greater than bigest_deg.
  */
-Polynomial::Polynomial(int_fast16_t smallest_deg, int_fast16_t bigest_deg)
-    : _trailingTermDegree(smallest_deg), _leadingTermDegree(bigest_deg), _Terms(std::vector<Term>(calcVectorSize(smallest_deg, bigest_deg))) {}
+Polynomial::Polynomial(int_fast16_t smallest_deg, int_fast16_t biggest_deg)
+    : _trailingTermDegree(smallest_deg), _leadingTermDegree(biggest_deg), _Terms(std::vector<Term>(calcVectorSize(smallest_deg, biggest_deg))) {}
 
 /**
  * @brief Construct a polynomial from explicit coefficients.

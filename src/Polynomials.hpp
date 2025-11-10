@@ -15,28 +15,7 @@ struct Term
 
     inline void operator*=(const double scalar) { coefficient *= scalar; }
 
-    inline void operator/=(const double scalar)
-    {
-        if (scalar == 0)
-            throw PolynomialArithmeticException("/=", "zero division exception."); // TODO: create a new Exception class
-        coefficient /= scalar;
-    }
-
-    inline void operator+=(const Term &n)
-    {
-        if (degree != n.degree)
-            throw PolynomialArithmeticException("+=", "2 terms must have the same exponent sum them."); // TODO: create a new Exception class
-        coefficient += n.coefficient;
-    }
-
-    inline void operator-=(const Term &n)
-    {
-        if (degree != n.degree)
-            throw PolynomialArithmeticException("-=", "2 terms must have the same exponent sum them."); // TODO: create a new Exception class
-        coefficient -= n.coefficient;
-    }
-
-    inline bool operator==(const Term &n) const { return coefficient == n.coefficient && degree == n.degree; }
+    inline void operator/=(const double scalar);
 };
 
 /**
