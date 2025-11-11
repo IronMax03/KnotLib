@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-class InconsistenPlanarDiagram : public std::exception
+class InconsistenPlanarDiagram : public std::exception // NOTE: not finished
 {
 public:
     InconsistenPlanarDiagram() {};
@@ -41,7 +41,7 @@ public:
 
     const char *what() const noexcept
     {
-        return (_operationType + ": " + _message).c_str();
+        return std::move((_operationType + ": " + _message).c_str());
     }
 };
 
@@ -56,6 +56,6 @@ public:
 
     const char *what() const noexcept
     {
-        return (std::to_string(_exp) + " was not fund in the polynom.").c_str();
+        return std::move((std::to_string(_exp) + " was not fund in the polynom.").c_str());
     }
 };

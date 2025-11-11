@@ -29,6 +29,7 @@ int main()
 
 void runTests()
 {
+   cout << "_____________________________________________________________________________" << endl;
    cout << "______________________________[Polnomial Tests]______________________________" << endl;
 
     Polynomial poly;
@@ -45,27 +46,32 @@ void runTests()
 
     Polynomial poly2 = Polynomial(vector<Term>{Term{3,-1}, Term{3,1}}, 0, 3);
 
+    // polynomial operation
     assert(poly != poly2);
     assert(!(poly == poly2));
 
+    // scalar operation
     cout << (poly + 2.0).toString() << endl;
-    assert((poly + 2.0).toString() == "5.000000x^0 + 1.000000x^1 + 0.000000x^2 + 9.000000x^3");    assert(poly.toString() == "3.000000x^0 + 1.000000x^1 + 0.000000x^2 + 9.000000x^3");
+    assert((poly + 2.0).toString() == "5.000000x^0 + 1.000000x^1 + 0.000000x^2 + 9.000000x^3");
+    assert(poly.toString() == "3.000000x^0 + 1.000000x^1 + 0.000000x^2 + 9.000000x^3");
     assert((poly - 2.0).toString() == "1.000000x^0 + 1.000000x^1 + 0.000000x^2 + 9.000000x^3");
     assert((poly * 2.0).toString() == "6.000000x^0 + 2.000000x^1 + 0.000000x^2 + 18.000000x^3");
     assert((poly / 2.0).toString() == "1.500000x^0 + 0.500000x^1 + 0.000000x^2 + 4.500000x^3");
-
     cout << (poly / 2.0).toString() << endl;
 
+    assert(Polynomial(vector<Term>{Term{4,0}},0 ,0) == 4);
 
+    // isMonomial
     cout << (Polynomial().isMonomial() ? "True" : "False") << endl;
     cout << (Polynomial(vector<Term>{Term{3,2}}, 2, 2).isMonomial() ? "True" : "False") << endl;
     assert(Polynomial().isMonomial());
     assert(Polynomial(vector<Term>{Term{3,2}}, 2, 2).isMonomial());
     assert(!Polynomial(vector<Term>{Term{3,2}, Term{1,2}}, 2, 2).isMonomial());
 
-
-    assert(Polynomial(vector<Term>{Term{3,2}, Term{1,2}}, 2, 2).findExponent(2) == 1);
+    // findExponent(int)
+    assert(Polynomial(vector<Term>{Term{3,-1}, Term{1,2}}, 2, 2).findExponent(2) == 1);
     assert(Polynomial(vector<Term>{Term{3, -2}, Term{1, -1}, Term{3,2}, Term{1,2}}, 2, 2).findExponent(-2) == 0);
+    assert(Polynomial(vector<Term>{Term{3, -2}, Term{1, -1}}, 2, 2).findExponent(-1) == 0);
 
     cout << "_____________________________________________________________________________" << endl;
 }

@@ -1,7 +1,9 @@
 # compiled file
 main
-# vscode
+
+# Other
 .vscode
+.DS_Store
 
 # other files to ignore
 build/

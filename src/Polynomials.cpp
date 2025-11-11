@@ -1,7 +1,8 @@
 #include "Polynomials.hpp"
+#include <vector>
 
 Polynomial::Polynomial()
-    : _Terms(std::vector<Term>{Term{0,0}}), _trailingTermDegree(0), _leadingTermDegree(0) {}
+    : Terms(std::vector<Term>{Term{0,0}}), _trailingTermDegree(0), _leadingTermDegree(0) {}
 
 /**
  * @brief Construct a polynomial whose coefficients default to zero.
@@ -10,7 +11,7 @@ Polynomial::Polynomial()
  * @throws PolynomialBoundException if smallest_deg is greater than bigest_deg.
  */
 Polynomial::Polynomial(int_fast16_t smallest_deg, int_fast16_t biggest_deg)
-    : _trailingTermDegree(smallest_deg), _leadingTermDegree(biggest_deg), _Terms(std::vector<Term>(calcVectorSize(smallest_deg, biggest_deg))) {}
+    : _trailingTermDegree(smallest_deg), _leadingTermDegree(biggest_deg), Terms(std::vector<Term>(calcVectorSize(smallest_deg, biggest_deg))) {}
 
 /**
  * @brief Construct a polynomial from explicit coefficients.
@@ -20,18 +21,39 @@ Polynomial::Polynomial(int_fast16_t smallest_deg, int_fast16_t biggest_deg)
  * @throws PolynomialBoundException if smallest_deg is greater than bigest_deg.
  */
 Polynomial::Polynomial(std::vector<Term> coefficient, int_fast16_t smallest_deg, int_fast16_t bigest_deg)
-    : _Terms(coefficient), _trailingTermDegree(smallest_deg), _leadingTermDegree(bigest_deg)
+    : Terms(coefficient), _trailingTermDegree(smallest_deg), _leadingTermDegree(bigest_deg)
 {
     if (smallest_deg > bigest_deg)
         throw PolynomialBoundException("smallest_deg must be smaller or equal then bigest_deg");
 }
 
 // Polynomial operations
-bool Polynomial::operator==(const Polynomial &n) const { return this->_Terms == n._Terms; } 
-bool Polynomial::operator!=(const Polynomial &n) const { return this->_Terms != n._Terms; }
+bool Polynomial::operator==(const Polynomial &n) const { return this->Terms == n.Terms; } 
+bool Polynomial::operator!=(const Polynomial &n) const { return this->Terms != n.Terms; }
+
+Polynomial Polynomial::operator+(const Polynomial &n) const
+{
+    const Polynomial& leading = _leadingTermDegree > n.getLeadingDegree() ? *this: n;
+    const Polynomial& trailing = _trailingTermDegree > n.getTrailingDegree() ? *this: n;
+
+
+    std::vector<Term> newVec(calcVectorSize(trailing.getTrailingDegree(), leading.getLeadingDegree()));
+
+    for(size_t i = 0; i < newVec.size(); ++i)
+    {
+        if () // trailling sequence
+            newVec[i] = trailing.Terms.at(i);
+        else if () // Intersection
+            newVec[i] =  trailing.Terms.at(i) + leading.Terms.at(i);
+        else if () // leading sequence
+            newVec[i] = leading.Terms.at(i);
+    }
+
+
+    return Polynomial(std::move(newVec), trailing.getTrailingDegree(), leading.getLeadingDegree());
+}
 
 /*
-! todo
 Polynomial Polynomial::operator+(const Polynomial &n) const
 {
 
@@ -45,7 +67,6 @@ Polynomial Polynomial::operator-(const Polynomial &n) const
 Polynomial Polynomial::operator*(const Polynomial &n) const;
 Polynomial Polynomial::operator/(const Polynomial &n) const;
 
-void Polynomial::operator+=(const Polynomial &n);
 void Polynomial::operator-=(const Polynomial &n);
 void Polynomial::operator*=(const Polynomial &n);
 void Polynomial::operator/=(const Polynomial &n);
@@ -54,15 +75,15 @@ void Polynomial::operator/=(const Polynomial &n);
 // scalar operations
 bool Polynomial::operator==(const double scalar) const
 {
-    if (isMonomial() && _Terms.at(0).degree == 0)
-        return scalar == _Terms.at(0).coefficient;
+    if (isMonomial() && Terms.at(0).degree == 0)
+        return scalar == Terms.at(0).coefficient;
     throw PolynomialArithmeticException("==", "The polynomial must be a monomial with exponant 0.");
 }
 
 bool Polynomial::operator!=(const double scalar) const 
 {
-    if (isMonomial() && _Terms.at(0).degree == 0)
-        return scalar != _Terms.at(0).coefficient;
+    if (isMonomial() && Terms.at(0).degree == 0)
+        return scalar != Terms.at(0).coefficient;
     throw PolynomialArithmeticException("!=", "The polynomial must be a monomial with exponant 0.");
 }
 
@@ -94,28 +115,29 @@ Polynomial Polynomial::operator/(const double scalar) const
     return std::move(temp);
 }
 
-void Polynomial::operator+=(const double scalar) { _Terms[findExponent(0)].coefficient += scalar; }
-void Polynomial::operator-=(const double scalar) { _Terms[findExponent(0)].coefficient -= scalar; }
+void Polynomial::operator+=(const double scalar) { Terms[findExponent(0)].coefficient += scalar; }
+void Polynomial::operator-=(const double scalar) { Terms[findExponent(0)].coefficient -= scalar; }
 
 void Polynomial::operator*=(const double scalar)
 {
-    for (size_t i = 0; i < _Terms.size(); i++)
+    for (size_t i = 0; i < Terms.size(); i++)
     {
-        _Terms[i] *= scalar;
+        Terms[i] *= scalar;
     }
 }
 
 void Polynomial::operator/=(const double scalar)
 {
-    for (size_t i = 0; i < _Terms.size(); i++)
+    for (size_t i = 0; i < Terms.size(); i++)
     {
-        _Terms[i] /= scalar;
+        Terms[i] /= scalar;
     }
 }
 
-Term Polynomial::getTerm(size_t i) const { return _Terms.at(i); }
+Term Polynomial::getTerm(size_t i) const { return Terms.at(i); }
 
-int_fast16_t Polynomial::getDegree() const { return _leadingTermDegree; }
+int_fast16_t Polynomial::getLeadingDegree() const { return _leadingTermDegree; }
+int_fast16_t Polynomial::getTrailingDegree() const { return _trailingTermDegree; }
 
 /**
  * @brief Returns a string representation of the polynomial.
@@ -124,13 +146,13 @@ int_fast16_t Polynomial::getDegree() const { return _leadingTermDegree; }
 std::string Polynomial::toString() const
 {
     // ensures _coefficient is not empty
-    if (_Terms.empty())
+    if (Terms.empty())
         return "... + 0x^-1 + 0x^0 + 0x^1 + ...";
 
-    std::string output = std::to_string(_Terms.at(0).coefficient) + "x^" + std::to_string(_trailingTermDegree);
-    for (size_t i = 1; i < _Terms.size(); ++i)
+    std::string output = std::to_string(Terms.at(0).coefficient) + "x^" + std::to_string(_trailingTermDegree);
+    for (size_t i = 1; i < Terms.size(); ++i)
     {
-        output += " + " + std::to_string(_Terms.at(i).coefficient) + "x^" + std::to_string(_Terms.at(i).degree);
+        output += " + " + std::to_string(Terms.at(i).coefficient) + "x^" + std::to_string(Terms.at(i).degree);
 
         if (i + _trailingTermDegree == 0)
             i++;
@@ -141,8 +163,8 @@ std::string Polynomial::toString() const
 
 bool Polynomial::isMonomial() const
 {
-  std::cout << _Terms.size() << std::endl;
-  return _Terms.size() == 1;
+  std::cout << Terms.size() << std::endl;
+  return Terms.size() == 1;
 }
 
 
@@ -181,4 +203,4 @@ size_t Polynomial::binarySearch(const std::vector<Term> &lst, size_t low, size_t
     return -1;
 }
 
-size_t Polynomial::findExponent(int_fast16_t exponent) const { return binarySearch(_Terms, 0, _Terms.size(), exponent); }
+size_t Polynomial::findExponent(int_fast16_t exponent) const { return binarySearch(Terms, 0, Terms.size() - 1, exponent); }
