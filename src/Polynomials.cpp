@@ -1,4 +1,6 @@
 #include "Polynomials.hpp"
+#include <cstddef>
+#include <sys/_types/_u_int16_t.h>
 #include <vector>
 
 Polynomial::Polynomial()
@@ -11,7 +13,11 @@ Polynomial::Polynomial()
  * @throws PolynomialBoundException if smallest_deg is greater than bigest_deg.
  */
 Polynomial::Polynomial(int_fast16_t smallest_deg, int_fast16_t biggest_deg)
-    : _trailingTermDegree(smallest_deg), _leadingTermDegree(biggest_deg), Terms(std::vector<Term>(calcVectorSize(smallest_deg, biggest_deg))) {}
+    : _trailingTermDegree(smallest_deg), _leadingTermDegree(biggest_deg), Terms(std::vector<Term>(calcVectorSize(smallest_deg, biggest_deg)))
+{
+    if (smallest_deg > biggest_deg)
+        throw PolynomialBoundException("smallest_deg must be smaller or equal then bigest_deg");
+}
 
 /**
  * @brief Construct a polynomial from explicit coefficients.
@@ -20,17 +26,18 @@ Polynomial::Polynomial(int_fast16_t smallest_deg, int_fast16_t biggest_deg)
  * @param bigest_deg Inclusive upper bound of the exponent range.
  * @throws PolynomialBoundException if smallest_deg is greater than bigest_deg.
  */
-Polynomial::Polynomial(std::vector<Term> coefficient, int_fast16_t smallest_deg, int_fast16_t bigest_deg)
-    : Terms(coefficient), _trailingTermDegree(smallest_deg), _leadingTermDegree(bigest_deg)
+Polynomial::Polynomial(std::vector<Term> coefficient, int_fast16_t smallest_deg, int_fast16_t biggest_deg)
+    : Terms(coefficient), _trailingTermDegree(smallest_deg), _leadingTermDegree(biggest_deg)
 {
-    if (smallest_deg > bigest_deg)
+    if (smallest_deg > biggest_deg)
         throw PolynomialBoundException("smallest_deg must be smaller or equal then bigest_deg");
 }
 
 // Polynomial operations
-bool Polynomial::operator==(const Polynomial &n) const { return this->Terms == n.Terms; } 
+bool Polynomial::operator==(const Polynomial &n) const { return this->Terms == n.Terms; }
 bool Polynomial::operator!=(const Polynomial &n) const { return this->Terms != n.Terms; }
 
+/*
 Polynomial Polynomial::operator+(const Polynomial &n) const
 {
     const Polynomial& leading = _leadingTermDegree > n.getLeadingDegree() ? *this: n;
@@ -39,7 +46,9 @@ Polynomial Polynomial::operator+(const Polynomial &n) const
 
     std::vector<Term> newVec(calcVectorSize(trailing.getTrailingDegree(), leading.getLeadingDegree()));
 
-    for(size_t i = 0; i < newVec.size(); ++i)
+
+
+    for(size_t i = 0, j = 0; i < newVec.size() && j < ; ++i)
     {
         if () // trailling sequence
             newVec[i] = trailing.Terms.at(i);
@@ -53,7 +62,6 @@ Polynomial Polynomial::operator+(const Polynomial &n) const
     return Polynomial(std::move(newVec), trailing.getTrailingDegree(), leading.getLeadingDegree());
 }
 
-/*
 Polynomial Polynomial::operator+(const Polynomial &n) const
 {
 
@@ -134,6 +142,47 @@ void Polynomial::operator/=(const double scalar)
     }
 }
 
+// other polynomial operation
+
+/*
+void Polynomial::simplify()
+{
+
+}
+*/
+
+/**
+ * @brief make the polynomial representation denser.
+ * Example: x^-1 + 3x^2 becomes x^-1 + 0x^0 + 0x^1 + 3x^2
+ */
+void Polynomial::densify() { this->densify(_trailingTermDegree, _leadingTermDegree); }
+
+
+/**
+ * @brief make the polynomial representation dense.
+ * @param startDegree the smallest degree of the dense representation.
+ * @param endDegree the bigest degree of the dense representation.
+ * Example: x^-1 + 3x^2 becomes x^-1 + 0x^0 + 0x^1 + 3x^2
+ */
+void Polynomial::densify(const int_fast16_t startDegree, const int_fast16_t endDegree)
+{
+    std::vector<Term> denseVec(calcVectorSize(startDegree, endDegree));
+
+    for(size_t i = 0, j = 0; i < denseVec.size(); i++)
+    {
+        if ((int_fast16_t)i + startDegree == Terms.at(j).degree)
+        {
+            denseVec[i] =  Terms.at(j);
+            j = Terms.size() - 1 < j ? 1 : 0; // ensures j doesnt go out of range
+        }
+        else
+            denseVec[i] = Term{0, (int_fast16_t)(i + startDegree)};
+    }
+    Terms = std::move(denseVec);
+}
+
+
+// Read only
 Term Polynomial::getTerm(size_t i) const { return Terms.at(i); }
 
 int_fast16_t Polynomial::getLeadingDegree() const { return _leadingTermDegree; }
@@ -180,10 +229,21 @@ size_t Polynomial::calcVectorSize(int_fast16_t smallest_deg, int_fast16_t bigest
 
     if (smallest_deg > bigest_deg)
         throw PolynomialBoundException("smallest_deg must be smaller or equal then bigest_deg.");
-    else if (smallest_deg <= 0 || bigest_deg <= 0)
+    else if (smallest_deg <= 0 || bigest_deg >= 0)
         size++;
 
     return size;
+}
+
+/**
+ *  @brief check in Terms if element i and i-1 are sorted ascending.
+ */
+void Polynomial::isInOrder(size_t i) const
+{
+  if(i != 0)
+    return;
+  else if(Terms.at(i - 1).degree >= Terms.at(i).degree)
+    throw PolynomialRepresentationException("Terms is not sorted.");
 }
 
 size_t Polynomial::binarySearch(const std::vector<Term> &lst, size_t low, size_t hight, const int_fast16_t value)
@@ -200,7 +260,7 @@ size_t Polynomial::binarySearch(const std::vector<Term> &lst, size_t low, size_t
         return binarySearch(lst, (hight + low) / 2, hight, value);
 
     throw ExponentNotFound(value);
-    return -1;
 }
 
-size_t Polynomial::findExponent(int_fast16_t exponent) const { return binarySearch(Terms, 0, Terms.size() - 1, exponent); }
+size_t Polynomial::findExponent(int_fast16_t exponent) const
+{ return binarySearch(Terms, 0, Terms.size() - 1, exponent); }

@@ -9,7 +9,7 @@ Knot::Knot(const std::vector<crossing> &planarDiagram)
 {
     if(isConcistent())
     {
-      throw InconsistenPlanarDiagram();
+      throw InconsistentPlanarDiagram();
     }
 
     _planarDiagram = std::move(planarDiagram);

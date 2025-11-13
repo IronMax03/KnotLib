@@ -50,7 +50,7 @@ void runTests()
     assert(poly != poly2);
     assert(!(poly == poly2));
 
-    // scalar operation
+    // scalar operation and .toString()
     cout << (poly + 2.0).toString() << endl;
     assert((poly + 2.0).toString() == "5.000000x^0 + 1.000000x^1 + 0.000000x^2 + 9.000000x^3");
     assert(poly.toString() == "3.000000x^0 + 1.000000x^1 + 0.000000x^2 + 9.000000x^3");
@@ -69,9 +69,46 @@ void runTests()
     assert(!Polynomial(vector<Term>{Term{3,2}, Term{1,2}}, 2, 2).isMonomial());
 
     // findExponent(int)
-    assert(Polynomial(vector<Term>{Term{3,-1}, Term{1,2}}, 2, 2).findExponent(2) == 1);
-    assert(Polynomial(vector<Term>{Term{3, -2}, Term{1, -1}, Term{3,2}, Term{1,2}}, 2, 2).findExponent(-2) == 0);
-    assert(Polynomial(vector<Term>{Term{3, -2}, Term{1, -1}}, 2, 2).findExponent(-1) == 0);
+    assert(Polynomial(vector<Term>{Term{3, -1},
+                                   Term{1, 2}}, 2, 2)
+                                   .findExponent(2) == 1);
+
+    assert(Polynomial(vector<Term>{Term{3, -2},
+                                   Term{1, -1},
+                                   Term{3, 2},
+                                   Term{1, 3}}, 2, 2)
+                                   .findExponent(3) == 3);
+
+    assert(Polynomial(vector<Term>{Term{2, -20},
+                                   Term{4, -15},
+                                   Term{8, -10},
+                                   Term{16, -5},
+                                   Term{32, -1}}, 2, 2)
+                                   .findExponent(-10) == 2);
+
+    // density()
+    poly2 = Polynomial(vector<Term>{Term{3,-1}, Term{1,2}}, -1, 2);
+    std::cout << "<------------->" << std::endl;
+    poly2.densify();
+    std::cout << "<------------->" << std::endl;
+    assert(poly2 == Polynomial(vector<Term>{Term{3, -1},
+                                            Term{0, 0},
+                                            Term{0, 1},
+                                            Term{1, 2}}, -1, 2));
+    std::cout << "<------------->" << std::endl;
+
+
+    poly2 = Polynomial(vector<Term>{Term{3,1}, Term{1,2}}, 1, 2);
+      std::cout << "<------------->" << std::endl;
+
+    poly2.densify(-1,3);
+      std::cout << "<------------->" << std::endl;
+
+    assert(poly2 == Polynomial(vector<Term>{Term{0, -1},
+                                            Term{0, 0},
+                                            Term{3, 1},
+                                            Term{1, 2},
+                                            Term{0, 3}}, 2, 2));
 
     cout << "_____________________________________________________________________________" << endl;
 }

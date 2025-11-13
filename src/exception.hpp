@@ -1,61 +1,72 @@
 #pragma once
 
 #include <exception>
-#include <iostream>
 #include <string>
 
-class InconsistenPlanarDiagram : public std::exception // NOTE: not finished
+/*
+** Base class for all Knotlib Exceptions
+ */
+class KnotlibExceptions : public std::exception
 {
 public:
-    InconsistenPlanarDiagram() {};
+    explicit KnotlibExceptions(const std::string& msg) :  _message(msg) {}
+    explicit KnotlibExceptions(const char* msg) :  _message(msg) {}
+    ~KnotlibExceptions() override = default;
 
-    const char *what() const noexcept
-    {
-        return "";
-    }
+    const char *what() const noexcept override{ return _message.c_str(); }
+
+private:
+        std::string _message;
 };
 
-class PolynomialBoundException : public std::exception
+/*
+** thrown when the Planar Diagram of a knot is not properly formated or consistent.
+ */
+class InconsistentPlanarDiagram : public KnotlibExceptions // NOTE: not finished
+{
+public:
+    InconsistentPlanarDiagram(const std::string& msg) : KnotlibExceptions(msg)  {};
+};
+
+/*
+**
+ */
+class PolynomialBoundException : public KnotlibExceptions
+{
+public:
+    PolynomialBoundException(const std::string& msg) : KnotlibExceptions(msg) {}
+};
+
+/*
+** Thrown when a Polynomial arithmetic operation failed.
+ */
+class PolynomialArithmeticException : public KnotlibExceptions
 {
 private:
-    std::string _message;
+    std::string _operationType; // +, -, *, ==, +=, etc.
 
 public:
-    PolynomialBoundException(const std::string msg) : _message(msg) {}
-
-    const char *what() const noexcept
-    {
-        return _message.c_str();
-    }
+    PolynomialArithmeticException(const std::string& opType, const std::string& msg) :  KnotlibExceptions(opType + ": " + msg), _operationType(opType) {}
 };
 
-
-class PolynomialArithmeticException : public std::exception
-{
-private:
-    std::string _operationType; // +, -, *, ==, +=, etc
-    std::string _message;
-
-public:
-    PolynomialArithmeticException(const std::string opType, const std::string msg) : _operationType(opType), _message(msg) {}
-
-    const char *what() const noexcept
-    {
-        return std::move((_operationType + ": " + _message).c_str());
-    }
-};
-
-
-class ExponentNotFound : public std::exception
+/*
+** Thrown when failed searching for a term with a specific exponent.
+ */
+class ExponentNotFound : public KnotlibExceptions
 {
 private:
     int_fast16_t _exp;
 
 public:
-    ExponentNotFound(const int_fast16_t exponent) : _exp(exponent) {}
+    ExponentNotFound(const int_fast16_t& exponent) : _exp(exponent), KnotlibExceptions(std::to_string(exponent) + " was not found in the polynomial.") {}
 
-    const char *what() const noexcept
-    {
-        return std::move((std::to_string(_exp) + " was not fund in the polynom.").c_str());
-    }
+};
+
+/**
+ * Thrown when the formating of a Polynomial object is incorect.
+ * */
+class PolynomialRepresentationException : public KnotlibExceptions
+{
+public:
+    PolynomialRepresentationException(const std::string& msg) : KnotlibExceptions(msg) {}
 };

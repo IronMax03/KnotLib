@@ -1,10 +1,10 @@
 #pragma once
 
 #include "exception.hpp"
+#include <iostream>
 #include <vector>
 #include <cstdint>
 #include <utility>
-//#include <algorithm>
 #include <string>
 
 struct Term
@@ -12,7 +12,7 @@ struct Term
     double coefficient;
     int_fast16_t degree;
 
-    Term copy(const Term &n)
+    inline void copy(const Term &n)
     {
       coefficient = n.coefficient;
       degree = n.degree;
@@ -47,10 +47,7 @@ struct Term
     }
 
   
-    inline bool operator==(const Term &n) const
-    {
-      return coefficient == n.coefficient && degree == n.degree;
-    }
+    inline bool operator==(const Term &n) const { return coefficient == n.coefficient && degree == n.degree; }
 
     inline Term operator+(const Term &n) const
     {
@@ -115,6 +112,8 @@ public:
 
     // other polynomial operation
     void simplify();
+    void densify();
+    void densify(const int_fast16_t startDegree, const int_fast16_t endDegree);
 
     // read only
     Term getTerm(size_t i) const;
@@ -128,6 +127,8 @@ public:
 
 private:
     int_fast16_t _trailingTermDegree, _leadingTermDegree;
+
+    void isInOrder(size_t i) const;
 
     static size_t calcVectorSize(int_fast16_t smallest_deg, int_fast16_t biggest_deg);
     static size_t binarySearch(const std::vector<Term> &lst, size_t low, size_t hight, const int_fast16_t value);
