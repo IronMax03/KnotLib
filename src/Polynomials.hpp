@@ -1,29 +1,28 @@
 #pragma once
 
 #include "exception.hpp"
-#include <iostream>
 #include <vector>
 #include <cstdint>
 #include <utility>
 #include <string>
 
+#ifndef DEGREE_TYPE // DEGREE_TYPE must be a fixed sized integer.
+  #define DEGREE_TYPE int_fast16_t
+#else
+  // ! check DEGREE_TYPE is an integer 
+#endif
+
 struct Term
 {
     double coefficient;
-    int_fast16_t degree;
-
-    inline void copy(const Term &n)
-    {
-      coefficient = n.coefficient;
-      degree = n.degree;
-    }
+    DEGREE_TYPE degree;
 
     inline void operator*=(const double scalar) { coefficient *= scalar; }
 
     inline void operator/=(const double scalar) 
     {
         if(scalar == 0)
-            throw PolynomialArithmeticException("/", "zero division exception.");
+            throw kle::PolynomialArithmeticException("/", "zero division exception.");
         coefficient /= scalar;
     }
 
@@ -33,8 +32,7 @@ struct Term
       if(degree == n.degree)
         coefficient += n.coefficient;
       else
-        throw PolynomialArithmeticException("+=", "2 terms of different degree cant be added.");
-
+        throw kle::PolynomialArithmeticException("+=", "2 terms of different degree cant be added.");
     }
 
 
@@ -43,7 +41,7 @@ struct Term
       if(degree == n.degree)
         coefficient -= n.coefficient;
       else
-        throw PolynomialArithmeticException("-", "2 terms of different degree cant be added.");
+        throw kle::PolynomialArithmeticException("-", "2 terms of different degree cant be added.");
     }
 
   
@@ -53,14 +51,14 @@ struct Term
     {
       Term t(*this);
       t += n;
-      return t;
+      return std::move(t);
     }
 
     inline Term operator-(const Term &n) const
     {
       Term t(*this);
       t -= n;
-      return t;
+      return std::move(t);
     }
 };
 
@@ -78,9 +76,10 @@ public:
 
     // constructor
     Polynomial();
+    Polynomial(std::vector<Term> coefficient);
     Polynomial(const Polynomial &n) = default;
-    Polynomial(int_fast16_t smallest_deg, int_fast16_t biggest_deg);
-    Polynomial(std::vector<Term> coefficient, int_fast16_t smallest_deg, int_fast16_t biggest_deg);
+    Polynomial(DEGREE_TYPE smallest_deg, DEGREE_TYPE biggest_deg);
+    Polynomial(std::vector<Term> coefficient, DEGREE_TYPE smallest_deg, DEGREE_TYPE biggest_deg);
 
     // Polynomial operators
     bool operator==(const Polynomial &n) const;
@@ -113,23 +112,22 @@ public:
     // other polynomial operation
     void simplify();
     void densify();
-    void densify(const int_fast16_t startDegree, const int_fast16_t endDegree);
+    void densify(const DEGREE_TYPE startDegree, const DEGREE_TYPE endDegree);
 
     // read only
     Term getTerm(size_t i) const;
-    int_fast16_t getLeadingDegree() const;
-    int_fast16_t getTrailingDegree() const;
+    DEGREE_TYPE getLeadingDegree() const;
+    DEGREE_TYPE getTrailingDegree() const;
     std::string toString() const;
     bool isMonomial() const;
-    bool isZero() const;
 
-    size_t findExponent(int_fast16_t exponent) const;
+    size_t findExponent(DEGREE_TYPE exponent) const;
 
 private:
-    int_fast16_t _trailingTermDegree, _leadingTermDegree;
+    DEGREE_TYPE _trailingTermDegree, _leadingTermDegree;
 
-    void isInOrder(size_t i) const;
+    void isInOrdered(size_t i) const;
 
-    static size_t calcVectorSize(int_fast16_t smallest_deg, int_fast16_t biggest_deg);
-    static size_t binarySearch(const std::vector<Term> &lst, size_t low, size_t hight, const int_fast16_t value);
+    static size_t calcVectorSize(DEGREE_TYPE smallest_deg, DEGREE_TYPE biggest_deg);
+    static size_t binarySearch(const std::vector<Term> &lst, size_t low, size_t hight, const DEGREE_TYPE value);
 };

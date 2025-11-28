@@ -3,6 +3,9 @@
 #include <exception>
 #include <string>
 
+// knotlib exceptions
+namespace kle
+{
 /*
 ** Base class for all Knotlib Exceptions
  */
@@ -29,7 +32,7 @@ public:
 };
 
 /*
-**
+** 
  */
 class PolynomialBoundException : public KnotlibExceptions
 {
@@ -56,6 +59,7 @@ class ExponentNotFound : public KnotlibExceptions
 {
 private:
     int_fast16_t _exp;
+    std::string _message;
 
 public:
     ExponentNotFound(const int_fast16_t& exponent) : _exp(exponent), KnotlibExceptions(std::to_string(exponent) + " was not found in the polynomial.") {}
@@ -70,3 +74,4 @@ class PolynomialRepresentationException : public KnotlibExceptions
 public:
     PolynomialRepresentationException(const std::string& msg) : KnotlibExceptions(msg) {}
 };
+}
