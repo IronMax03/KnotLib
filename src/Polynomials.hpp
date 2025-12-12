@@ -6,10 +6,20 @@
 #include <utility>
 #include <string>
 
-#ifndef DEGREE_TYPE // DEGREE_TYPE must be a fixed sized integer.
+#ifndef EGREE_TYPE // DEGREE_TYPE must be a fixed sized integer.
   #define DEGREE_TYPE int_fast16_t
 #else
-  // ! check DEGREE_TYPE is an integer 
+  #define DEGREE_TYPE EGREE_TYPE
+
+  static_assert(
+    std::disjunction_v<
+        std::is_same<DEGREE_TYPE, std::int8_t>,  std::is_same<DEGREE_TYPE, std::int16_t>,
+        std::is_same<DEGREE_TYPE, std::int32_t>, std::is_same<DEGREE_TYPE, std::int64_t>,
+        std::is_same<DEGREE_TYPE, std::int_fast8_t>,  std::is_same<DEGREE_TYPE, std::int_fast16_t>,
+        std::is_same<DEGREE_TYPE, std::int_fast32_t>, std::is_same<DEGREE_TYPE, std::int_fast64_t>,
+        std::is_same<DEGREE_TYPE, std::int_least8_t>, std::is_same<DEGREE_TYPE, std::int_least16_t>,
+        std::is_same<DEGREE_TYPE, std::int_least32_t>, std::is_same<DEGREE_TYPE, std::int_least64_t>>,
+    "DEGREE_TYPE must be an 8/16/32/64-bit fixed-width, least, or fast signed integer type");
 #endif
 
 struct Term

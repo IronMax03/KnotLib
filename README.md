@@ -2,6 +2,12 @@
 
 Experimental C++20 library for computational knot theory.
 
+## Compile Project
+This project is intended to be compiled with `clang`. Other compilers might work but quality is only guaranteed with `clang`.  
+### parameters:
+some changes can be made during compilation by defining macros:
+- `-DEGREE_TYPE=int` changes the polynomial exponent data types to `int`; this command also works for any fixed length integers among fast integers and least integers.
+
 ## Objectives
 - Explore polynomial representations of knots.
 - Prototype numerical tools for basic invariant computations.
